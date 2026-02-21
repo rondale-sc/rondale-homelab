@@ -18,7 +18,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.hostname == pvevm-mali-node
+          - node.hostname == $MANAGER_NODE
 
 volumes:
   unbound_config:

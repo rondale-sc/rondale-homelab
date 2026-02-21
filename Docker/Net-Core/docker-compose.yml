@@ -1,0 +1,97 @@
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "8080:80/tcp"
+      - "8443:443/tcp"
+    environment:
+      TZ: "America/New_York"
+      FTLCONF_webserver_api_password: "$PI_HOLE_ADMIN_PASSWORD"
+      FTLCONF_dns_listeningMode: "ALL"
+      FTLCONF_dns_upstreams: "unbound#53"
+      FTLCONF_dns_specialDomains_iCloudPrivateRelay: "true"
+    volumes:
+      - "etc-pihole:/etc/pihole"
+    cap_add:
+      - NET_ADMIN
+      - SYS_TIME
+      - SYS_NICE
+    networks:
+      - dns_net
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == $MANAGER_NODE
+    restart: unless-stopped
+
+  unbound:
+    image: mvance/unbound:latest
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "drill", "@127.0.0.1", "-p", "53", "cloudflare.com"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "5335:53/tcp"
+      - "5335:53/udp"
+    volumes:
+      - unbound_config:/opt/unbound/etc/unbound/
+    networks:
+      - dns_net
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == $MANAGER_NODE
+
+  app:
+    image: "jc21/nginx-proxy-manager:latest"
+    restart: unless-stopped
+    environment:
+      TZ: "America/New_York"
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+    volumes:
+      - npm_data:/data
+      - letsencrypt:/etc/letsencrypt
+    networks:
+      - dns_net
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == $MANAGER_NODE
+
+volumes:
+  etc-pihole:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=$NFS_SERVER_IP,nolock,soft,rw
+      device: ":$NFS_SHARED_DIR/etc-pihole"
+  unbound_config:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=$NFS_SERVER_IP,nolock,soft,rw
+      device: ":$NFS_SHARED_DIR/etc-unbound"
+  npm_data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=$NFS_SERVER_IP,nolock,soft,rw
+      device: ":$NFS_SHARED_DIR/nginx-proxy-manager/data"
+  letsencrypt:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=$NFS_SERVER_IP,nolock,soft,rw
+      device: ":$NFS_SHARED_DIR/nginx-proxy-manager/letsencrypt"
+
+networks:
+  dns_net:

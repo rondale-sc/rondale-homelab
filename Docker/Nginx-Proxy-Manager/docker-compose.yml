@@ -11,6 +11,10 @@ services:
     volumes:
       - data:/data
       - letsencrypt:/etc/letsencrypt
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == $MANAGER_NODE
 
 volumes:
   data:

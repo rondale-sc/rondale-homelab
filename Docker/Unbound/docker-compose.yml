@@ -1,0 +1,33 @@
+services:
+  unbound:
+    image: mvance/unbound:latest
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "drill", "@127.0.0.1", "-p", "53", "cloudflare.com"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    ports:
+      - "5335:53/tcp"
+      - "5335:53/udp"
+    volumes:
+      - unbound_config:/opt/unbound/etc/unbound/
+    networks:
+      - dns_net
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == pvevm-mali-node
+
+volumes:
+  unbound_config:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=$NFS_SERVER_IP,nolock,soft,rw
+      device: ":/mnt/nfs_share/etc-unbound"
+
+networks:
+  dns_net:
+    external: true

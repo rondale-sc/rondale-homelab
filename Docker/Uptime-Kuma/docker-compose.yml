@@ -1,0 +1,25 @@
+services:
+  app:
+    image: louislam/uptime-kuma:latest
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - kuma_data:/app/data
+    networks:
+      - uptime-kuma
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == $MANAGER_NODE
+
+volumes:
+  kuma_data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=$NFS_SERVER_IP,nolock,soft,rw
+      device: ":$NFS_SHARED_DIR/uptime-kuma"
+
+networks:
+  uptime-kuma:

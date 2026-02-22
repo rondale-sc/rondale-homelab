@@ -24,7 +24,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 30s
+      start_period: 90s
     networks:
       - dns_net
     deploy:
@@ -32,7 +32,7 @@ services:
         constraints:
           - node.hostname == $MANAGER_NODE
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 5s
         max_attempts: 3
         window: 120s
@@ -57,7 +57,7 @@ services:
         constraints:
           - node.hostname == $MANAGER_NODE
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 5s
         max_attempts: 3
         window: 120s
@@ -86,7 +86,7 @@ services:
         constraints:
           - node.hostname == $MANAGER_NODE
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 5s
         max_attempts: 3
         window: 120s

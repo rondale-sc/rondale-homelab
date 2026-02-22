@@ -40,7 +40,7 @@ services:
   unbound:
     image: mvance/unbound:latest
     healthcheck:
-      test: ["CMD", "drill", "@127.0.0.1", "-p", "53", "cloudflare.com"]
+      test: ["CMD-SHELL", "drill @127.0.0.1 -p 53 cloudflare.com | grep -q NOERROR"]
       interval: 30s
       timeout: 5s
       retries: 3

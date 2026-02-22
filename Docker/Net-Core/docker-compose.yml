@@ -19,17 +19,26 @@ services:
       - NET_ADMIN
       - SYS_TIME
       - SYS_NICE
+    healthcheck:
+      test: ["CMD", "dig", "+short", "pi.hole", "@127.0.0.1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
     networks:
       - dns_net
     deploy:
       placement:
         constraints:
           - node.hostname == $MANAGER_NODE
-    restart: unless-stopped
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   unbound:
     image: mvance/unbound:latest
-    restart: unless-stopped
     healthcheck:
       test: ["CMD", "drill", "@127.0.0.1", "-p", "53", "cloudflare.com"]
       interval: 30s
@@ -47,10 +56,14 @@ services:
       placement:
         constraints:
           - node.hostname == $MANAGER_NODE
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
   app:
     image: "jc21/nginx-proxy-manager:latest"
-    restart: unless-stopped
     environment:
       TZ: "America/New_York"
     ports:
@@ -60,12 +73,23 @@ services:
     volumes:
       - npm_data:/data
       - letsencrypt:/etc/letsencrypt
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:81/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     networks:
       - dns_net
     deploy:
       placement:
         constraints:
           - node.hostname == $MANAGER_NODE
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
 
 volumes:
   etc-pihole:

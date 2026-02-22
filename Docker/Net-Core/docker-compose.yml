@@ -34,7 +34,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-        max_attempts: 3
+        max_attempts: 50
         window: 120s
 
   unbound:
@@ -59,7 +59,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-        max_attempts: 3
+        max_attempts: 50
         window: 120s
 
   app:
@@ -88,7 +88,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-        max_attempts: 3
+        max_attempts: 50
         window: 120s
 
 volumes:

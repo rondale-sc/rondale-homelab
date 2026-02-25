@@ -63,7 +63,7 @@ services:
         window: 120s
 
   pihole-exporter:
-    image: ekofr/pihole-exporter:latest
+    image: ekofr/pihole-exporter:v1.2.0
     environment:
       PIHOLE_HOSTNAME: pihole
       PIHOLE_PASSWORD: "$PI_HOLE_ADMIN_PASSWORD"

@@ -62,6 +62,32 @@ services:
         max_attempts: 50
         window: 120s
 
+  pihole-exporter:
+    image: ekofr/pihole-exporter:latest
+    environment:
+      PIHOLE_HOSTNAME: pihole
+      PIHOLE_PASSWORD: "$PI_HOLE_ADMIN_PASSWORD"
+      PORT: "9617"
+    ports:
+      - "9617:9617"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:9617/metrics"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    networks:
+      - dns_net
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == $MANAGER_NODE
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 50
+        window: 120s
+
   app:
     image: "jc21/nginx-proxy-manager:latest"
     environment:

@@ -64,6 +64,7 @@ services:
 
   pihole-exporter:
     image: ekofr/pihole-exporter:v1.2.0
+    tty: true
     environment:
       PIHOLE_HOSTNAME: pihole
       PIHOLE_PASSWORD: "$PI_HOLE_ADMIN_PASSWORD"

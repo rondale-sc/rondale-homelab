@@ -3,8 +3,14 @@ services:
     container_name: pihole
     image: pihole/pihole:latest
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
+      - target: 53
+        published: 53
+        protocol: tcp
+        mode: host
+      - target: 53
+        published: 53
+        protocol: udp
+        mode: host
       - "8080:80/tcp"
       - "8443:443/tcp"
     environment:
@@ -13,6 +19,7 @@ services:
       FTLCONF_dns_listeningMode: "ALL"
       FTLCONF_dns_upstreams: "unbound#53"
       FTLCONF_dns_specialDomains_iCloudPrivateRelay: "true"
+      FTLCONF_ntp_sync_active: "false"
     volumes:
       - "etc-pihole:/etc/pihole"
     cap_add:

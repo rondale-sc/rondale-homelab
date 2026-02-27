@@ -1,0 +1,31 @@
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    environment:
+      TZ: "America/New_York"
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - data:/data
+      - letsencrypt:/etc/letsencrypt
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == $MANAGER_NODE
+
+volumes:
+  data:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=$NFS_SERVER_IP,nolock,soft,rw
+      device: ":$NFS_DATA_DIR"
+  letsencrypt:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=$NFS_SERVER_IP,nolock,soft,rw
+      device: ":$NFS_LETSENCRYPT_DIR"
